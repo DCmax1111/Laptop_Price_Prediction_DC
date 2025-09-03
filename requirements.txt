@@ -1,1 +1,9 @@
+# requirements.txt
+
 # Dependencies list
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+joblib
