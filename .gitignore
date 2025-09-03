@@ -10,7 +10,7 @@ venv/
 .ipynb_checkpoints/
 
 # Data files (optional, if too large)
-*.csv
+# *.csv  (Commented out so CSV files are tracked)
 *.xlsx
 
 # OS-specific
