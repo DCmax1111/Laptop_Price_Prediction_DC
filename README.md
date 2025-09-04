@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 💻 Laptop Price Prediction
 
 This project predicts the price of laptops based on their specifications using **Machine Learning**.
@@ -74,3 +75,7 @@ GPU: Nvidia GeForce GTX 1050
 - DOMINION CLINTON (@)
 - Teammate 1
 - Teammate 2
+=======
+# Laptop_Price_Prediction_DC
+Laptop price prediction using Linear Regression and Random Forest (scikit-learn project).
+>>>>>>> 6152abc242fc0b1bb4ca0b1591060c62defa4163
