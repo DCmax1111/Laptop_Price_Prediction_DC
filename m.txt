@@ -1,0 +1,16 @@
+## 🔑 Most Influential Factors
+
+From the analysis, the top features influencing laptop prices are:
+
+1. RAM (higher RAM → higher price)  
+2. CPU (processor family and generation strongly impact price)  
+3. GPU (dedicated graphics cards increase price significantly)  
+4. Storage type (SSD vs HDD; SSDs increase price more than HDDs)  
+5. Screen size (larger screens usually cost more)  
+6. Company brand (Apple, MSI, etc. are more expensive on average)  
+7. Weight (lighter ultrabooks often cost more due to premium design)  
+8. Operating System (Windows Pro/MacOS devices are more expensive than Linux/No OS)  
+9. Hybrid storage (hybrid storage configs slightly increase price)  
+10. Flash storage (smaller influence compared to SSD/HDD)
+
+These insights confirm that **hardware specs** (RAM, CPU, GPU, Storage) and **brand/design** are the main drivers of price.

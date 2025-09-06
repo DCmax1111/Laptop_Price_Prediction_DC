@@ -1,11 +1,12 @@
 <<<<<<< HEAD
-# 💻 Laptop Price Prediction
+# Laptop_Price_Prediction_DC
 
-This project predicts the price of laptops based on their specifications using **Machine Learning**.
+Laptop price prediction using **Machine Learning**. This project predicts the price of laptops based on their specifications using Linear Regression and Random Forest (scikit-learn project).
+
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 Laptop_Price_Prediction/
 │── data/
 │ ├── raw/ # Original dataset
@@ -24,7 +25,7 @@ Laptop_Price_Prediction/
 
 ---
 
-## ⚡ Features
+## Features
 - Data cleaning & preprocessing  
 - Exploratory data analysis (EDA)  
 - Model training (Linear Regression, Random Forest)  
@@ -34,7 +35,7 @@ Laptop_Price_Prediction/
 
 ---
 
-## 🚀 How to Run
+## How to Run
 1. Clone the repository  
    ```bash
    git clone <repo_url>
@@ -51,7 +52,7 @@ Laptop_Price_Prediction/
 
 ---
 
-## 💻 Laptop Price Prediction Demo
+## Laptop Price Prediction Demo
 Please enter your laptop specifications.
 
 Company (e.g., Dell, Apple, HP): Dell
@@ -67,15 +68,18 @@ Flash storage (GB, 0 if none): 0
 CPU: Intel Core i7
 GPU: Nvidia GeForce GTX 1050
 
-💰 Predicted Laptop Price: €1234.56
+Predicted Laptop Price: €1234.56
 
 ---
 
-## 👥 Contributors
-- DOMINION CLINTON (@)
-- Teammate 1
-- Teammate 2
-=======
-# Laptop_Price_Prediction_DC
-Laptop price prediction using Linear Regression and Random Forest (scikit-learn project).
->>>>>>> 6152abc242fc0b1bb4ca0b1591060c62defa4163
+## Contributors
+- Akpan Idongesit Moses        | 23/EG/CO/086 | @
+- Sendan Abasiofon Uduak       | 23/EG/CO/087 | @abasiofon-sendan
+- Usanga Ofonmbuk Mfon         | 23/EG/CO/092 | @
+- Mbikan Gracious              | 23/EG/CO/093 | @
+- Okon Godspower Aniedi        | 23/EG/CO/094 | @kompanyokon-hub
+- Okechukwu Victory            | 23/EG/CO/095 | @
+- Clinton Dominion Chinecherem | 23/EG/CO/096 | @DCmax111
+- Usoro Ekemini Sunday         | 23/EG/CO/098 | @
+- Aaron Shedrach Puyaighe      | 23/EG/CO/099 | @Shaddie-B
+- Israel Emana Jimmy           | 23/EG/CO/101 | @Gmie72

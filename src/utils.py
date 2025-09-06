@@ -4,7 +4,7 @@ import joblib
 from datetime import datetime
 
 # Paths
-MODEL_PATH = "models/laptop_price_model.pkl"
+MODEL_PATH = "models/best_model.pkl"
 FEATURES_PATH = "models/feature_names.pkl"
 LOG_FILE = "logs/input_errors.log"
 
@@ -199,7 +199,7 @@ def safe_choice_normalized(prompt, field, normalizer, options_list, default=None
 
 def get_user_inputs():
     """Collect laptop specifications safely with validations."""
-    print("💻 Laptop Price Prediction Demo")
+    print("Laptop Price Prediction Demo")
     print("Please enter your laptop specifications.\n")
 
     company = safe_choice_normalized("Company", "Company", normalize_company, VALID_COMPANIES, default="Dell")
@@ -264,3 +264,10 @@ def predict_price(sample_dict):
         print("⚠️ Could not generate a prediction due to unexpected input formatting. Please try again with clearer values.")
         log_event("error", "PREDICT", str(sample_dict), "Prediction failure")
         return None
+
+def preprocess_input(sample_dict, feature_names):
+    """Convert user inputs into the same format as training data."""
+    sample = pd.DataFrame([sample_dict])
+    sample_encoded = pd.get_dummies(sample)
+    sample_encoded = sample_encoded.reindex(columns=feature_names, fill_value=0)
+    return sample_encoded
