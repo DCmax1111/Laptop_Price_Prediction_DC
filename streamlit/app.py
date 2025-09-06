@@ -17,12 +17,12 @@ cpu = st.selectbox("CPU Brand", ["Intel Core i3", "Intel Core i5", "Intel Core i
 gpu = st.selectbox("GPU Brand", ["Intel", "Nvidia", "AMD", "Other"])
 opsys = st.selectbox("Operating System", ["Windows 10", "Windows 7", "MacOS", "Linux", "No OS/Other"])
 
-ram = st.slider("RAM (GB)", 2, 64, 8, 128)
+ram = st.slider("RAM (GB)", min_value=2, max_value=128, step=2, value=8)
 weight = st.number_input("Weight (kg)", min_value=0.5, max_value=5.0, step=0.1)
-ssd = st.number_input("SSD size (GB)", min_value=0, max_value=2000, value=0, step=128)
+ssd = st.number_input("SSD size (GB)", min_value=0, max_value=4000, value=512, step=128)
 hdd = st.number_input("HDD size (GB)", min_value=0, max_value=6000, value=0, step=500)
-flash = st.number_input("HDD size (GB)", min_value=0, max_value=64, value=0, step=16)
-hybrid = st.number_input("Hybrid storage (GB)", min_value=0, max_value=2000, value=0, step=128)
+flash = st.number_input("Flash Storage (GB)", min_value=0, max_value=1000, value=0, step=128)
+hybrid = st.number_input("Hybrid storage (GB)", min_value=0, max_value=2000, value=0, step=500)
 inches = st.slider("Screen Size (inches)", 10.0, 18.0, 15.6, 20.0)
 
 # Predict Button
