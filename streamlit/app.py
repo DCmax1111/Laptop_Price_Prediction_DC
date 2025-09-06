@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
-from utils import model, feature_names, preprocess_input
+from utils import model, feature_names, preprocess_input, predict_price
 
 # Load the trained model + scaler
 model = joblib.load("models/best_model.pkl")
@@ -11,7 +11,7 @@ st.title("Laptop Price Prediction App")
 st.write("Enter your laptop specifications to predict the price.")
 
 # User inputs
-company = st.selectbox("company", ["Dell", "HP", "Lenovo", "Apple", "Asus", "Acer", "MSI", "Other"])
+company = st.selectbox("Company", ["Dell", "HP", "Lenovo", "Apple", "Asus", "Acer", "MSI", "Other"])
 typename = st.selectbox("Type", ["Ultrabook", "Notebook", "Gaming", "2 in 1 Convertible", "Workstation"])
 cpu = st.selectbox("CPU Brand", ["Intel Core i3", "Intel Core i5", "Intel Core i7", "AMD", "Other"])
 gpu = st.selectbox("GPU Brand", ["Intel", "Nvidia", "AMD", "Other"])
@@ -46,7 +46,8 @@ if st.button("Predict Price"):
 
         # NOTE: Applying the same preprocessing (target encoding + scaling) here.
         input_data = preprocess_input(received_data, feature_names)
-        prediction = model.predict(input_data)[0]
+        # prediction = model.predict(input_data)[0]
+        prediction = predict_price(model, input_data)
         st.success(f"Estimated Price: ₤{prediction:.4f}")
     except Exception as e:
         st.error("Something went wrong while generating the prediction. Please check your inputs and try again.")

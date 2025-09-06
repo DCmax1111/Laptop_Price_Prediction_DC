@@ -1,5 +1,6 @@
 import re
 import pandas as pd
+import streamlit as st
 import joblib
 from datetime import datetime
 
@@ -246,25 +247,35 @@ def get_user_inputs():
         "Gpu": gpu
     }
 
-def predict_price(sample_dict):
+def predict_price(model, sample_dict):
     """Predict laptop price given specs; never exposes raw tracebacks."""
     # Safety checks
-    if model is None or feature_names is None:
+    if model is None:
         print("⚠️ Model files not found. Please run the training notebook to generate models first.")
         return None
+    if feature_names is None:
+        print("⚠️ Feature files not found. Please run the training notebook to generate models first.")
 
     try:
         sample = pd.DataFrame([sample_dict])
         sample_encoded = pd.get_dummies(sample)
         sample_encoded = sample_encoded.reindex(columns=feature_names, fill_value=0)
+        
+        # Run prediction with sanity checks for unrealistic outputs.
         pred = model.predict(sample_encoded)[0]
+
+        # Sanity bounds (based on your dataset: ₤100 - ₤6000)
+        if pred < 100 or pred > 6000:
+            st.warning(f"Prediction seems unrealistic (₤{pred:.2f})."
+                       f"Please re-check your inputs.")
         return round(float(pred), 2)
+    
     except Exception:
         # Final defence: never show raw errors to the user
         print("⚠️ Could not generate a prediction due to unexpected input formatting. Please try again with clearer values.")
         log_event("error", "PREDICT", str(sample_dict), "Prediction failure")
         return None
-
+    
 def preprocess_input(sample_dict, feature_names):
     """Convert user inputs into the same format as training data."""
     sample = pd.DataFrame([sample_dict])
