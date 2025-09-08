@@ -246,39 +246,130 @@ def get_user_inputs():
         "Cpu": cpu,
         "Gpu": gpu
     }
-
-def predict_price(model, sample_dict):
-    """Predict laptop price given specs; never exposes raw tracebacks."""
-    # Safety checks
-    if model is None:
-        print("⚠️ Model files not found. Please run the training notebook to generate models first.")
-        return None
-    if feature_names is None:
-        print("⚠️ Feature files not found. Please run the training notebook to generate models first.")
-
-    try:
-        sample = pd.DataFrame([sample_dict])
-        sample_encoded = pd.get_dummies(sample)
-        sample_encoded = sample_encoded.reindex(columns=feature_names, fill_value=0)
-        
-        # Run prediction with sanity checks for unrealistic outputs.
-        pred = model.predict(sample_encoded)[0]
-
-        # Sanity bounds (based on your dataset: ₤100 - ₤6000)
-        if pred < 100 or pred > 6000:
-            st.warning(f"Prediction seems unrealistic (₤{pred:.2f})."
-                       f"Please re-check your inputs.")
-        return round(float(pred), 2)
-    
-    except Exception:
-        # Final defence: never show raw errors to the user
-        print("⚠️ Could not generate a prediction due to unexpected input formatting. Please try again with clearer values.")
-        log_event("error", "PREDICT", str(sample_dict), "Prediction failure")
-        return None
-    
+ 
 def preprocess_input(sample_dict, feature_names):
     """Convert user inputs into the same format as training data."""
+    if feature_names is None:
+        print("⚠️ Feature files not found. Please run the training notebook to generate models first.")
+        return None
+    
+    # Convert dict -> DataFrame
     sample = pd.DataFrame([sample_dict])
+
+    # Normalize field names to training-time keys
+    if "Cpu" in sample.columns:
+        sample = sample.rename(columns={"Cpu": "Cpu_brand"})
+    if "Gpu" in sample.columns:
+        sample = sample.rename(columns={"Gpu": "Gpu_brand"})
+    if "OpSys" in sample.columns:
+        sample = sample.rename(columns={"OpSys": "OpSys"})
+
+    # One-hot encode & align
     sample_encoded = pd.get_dummies(sample)
     sample_encoded = sample_encoded.reindex(columns=feature_names, fill_value=0)
+
     return sample_encoded
+
+def predict_price(model, sample_encoded):
+    """Run safe prediction; round and sanity check - never expose raw tracebacks."""
+    # Safety Checks
+    if model is None:
+        print("⚠️ Model not loaded. Please train first.")
+        return None
+    
+    try:
+        pred = model.predict(sample_encoded)[0]
+        # Clip outliers (dataset: ~€100–€6000)
+        if pred < 100 or pred > 6000:
+            print(f"⚠️ Warning: prediction {pred:.2f} may be unrealistic.")
+        return round(float(pred), 2)
+    
+    except Exception as e:
+        print("⚠️ Could not generate prediction.")
+        log_event("error", "PREDICT", str(sample_encoded), f"Prediction failure: {e}")
+        return None
+
+
+man = """
+Here are **hyper-realistic test specs** along with actual approximate prices from real 2025 listings—perfect for validating your Streamlit model accuracy. Use these for testing, then share your results so we can see how close your app is to real-world.
+
+---
+
+## Real Laptop Specs to Test Your Model
+
+### 1. **Dell XPS 13 (Latest Gen)**
+
+* **Company**: Dell
+* **Type**: Ultrabook
+* **CPU**: Intel Core Ultra 5 (or Core Ultra 7 /9 for higher-end configs)
+* **GPU**: Integrated Intel Arc
+* **RAM**: 16 GB
+* **Storage**: 512 GB SSD
+* **Screen**: 13.4 in
+* **Weight**: \~1.2 kg
+* **OS**: Windows 11 Home
+  **Expected Price**: €1,398.99 (lowest config) to €1,748.99 (higher config)
+  ([Dell][1])
+
+---
+
+### 2. **MacBook Air (2025, M4 Chip)**
+
+* **Company**: Apple
+* **Type**: Ultrabook
+* **CPU**: Apple M4
+* **GPU**: Integrated
+* **RAM**: 16 GB (common config)
+* **Storage**: 512 GB SSD
+* **Screen**: 13.6 in
+* **Weight**: \~1.24 kg
+* **OS**: macOS
+  **Expected Price**: £1,299 (\~€1,500) for 512 GB model
+  ([Macworld][2])
+
+---
+
+### 3. **Lenovo Legion Slim 5 (Gaming)**
+
+* **Company**: Lenovo
+* **Type**: Gaming
+* **CPU**: AMD Ryzen 7
+* **GPU**: NVIDIA RTX 4060
+* **RAM**: 16 GB
+* **Storage**: 1 TB SSD + 1 TB HDD
+* **Screen**: 15.6 in
+* **Weight**: \~2.0 kg
+* **OS**: Windows 11
+  **Estimated Price**: \~€1,600 (based on typical pricing trends)
+
+---
+
+### 4. **Asus ZenBook Pro Duo (Creator)**
+
+* **Company**: Asus
+* **Type**: Workstation/Creative
+* **CPU**: Intel Core i9 (13th/14th Gen)
+* **GPU**: NVIDIA RTX 4070
+* **RAM**: 32 GB
+* **Storage**: 2 TB SSD
+* **Screen**: 14.5 in
+* **Weight**: \~1.8 kg
+* **OS**: Windows 11
+  **Estimated Price**: \~€2,400 (premium creator machine)
+
+---
+
+### 5. **HP Pavilion Gaming (Budget Gaming)**
+
+* **Company**: HP
+* **Type**: Gaming
+* **CPU**: AMD Ryzen 5
+* **GPU**: NVIDIA GTX 1650
+* **RAM**: 16 GB
+* **Storage**: 512 GB SSD + 1 TB HDD
+* **Screen**: 15.6 in
+* **Weight**: \~2.1 kg
+* **OS**: Windows 11
+  **Expected Price**: \~€900
+
+"""
