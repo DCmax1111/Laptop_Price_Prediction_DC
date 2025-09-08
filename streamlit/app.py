@@ -1,11 +1,12 @@
 import streamlit as st
 import pandas as pd
 import joblib
-from utils import model, feature_names, preprocess_input, predict_price
+from utils import model, feature_names, preprocess_input, predict_price, log_event
 
 # Load the trained model + scaler
 model = joblib.load("models/best_model.pkl")
 scaler = joblib.load("models/scaler.pkl")
+LOG_FILE = "logs/input_errors.log"
 
 st.title("Laptop Price Prediction App")
 st.write("Enter your laptop specifications to predict the price.")
@@ -103,10 +104,12 @@ if st.button("Predict Price"):
         
         # Sanity bounds (based on your dataset: ₤100 - ₤6000)
         if prediction < 100 or prediction > 6000:
-            st.warning(f"Prediction seems unrealistic (₤{prediction:.2f})."
-                       f"Please re-check your inputs.")
+            log_event("warn", "Prediction", str(received_data.to_dict()), f"Unrealistic prediction: {prediction:.2f}")
+            st.warning(f"Prediction seems unrealistic (₤{prediction:.2f}). Please re-check your inputs.")
             
         st.toast("Prediction ready!")
         st.success(f"Estimated Price: ₤{prediction:.4f}")
     except Exception as e:
-        st.error(f"Something went wrong while generating the prediction. Please check your inputs and try again. \n{e} occurred.")
+        log_event("error", "StreamlitApp", str(received_data.to_dict()), f"Prediction failed: {e}")
+        st.error(f"Something went wrong while generating the prediction. Please check your inputs and try again.")
+
