@@ -7,9 +7,54 @@ from utils import model, feature_names, preprocess_input, predict_price, log_eve
 model = joblib.load("models/best_model.pkl")
 scaler = joblib.load("models/scaler.pkl")
 LOG_FILE = "logs/input_errors.log"
+st.write("Loaded features:", feature_names[:10])
 
 st.title("Laptop Price Prediction App")
 st.write("Enter your laptop specifications to predict the price.")
+
+# Options
+CPU_MAP = {
+    # Intel
+    "Intel Core i3": "Intel",
+    "Intel Core i5": "Intel",
+    "Intel Core i7": "Intel",
+    "Intel Core i9": "Intel",
+    "Intel Pentium": "Intel",
+    "Intel Celeron": "Intel",
+
+    # AMD
+    "AMD Ryzen 3": "AMD",
+    "AMD Ryzen 5": "AMD",
+    "AMD Ryzen 7": "AMD",
+    "AMD Ryzen 9": "AMD",
+    "AMD Athlon": "AMD",
+
+    # Apple & Fallback (Other)
+    "Apple M1": "Other",
+    "Apple M2": "Other",
+    "Other": "Other"
+}
+GPU_MAP = {
+    # Intel
+    "Intel HD Graphics": "Intel",
+    "Intel UHD Graphics": "Intel",
+    "Intel Iris Xe": "Intel",
+
+    # Nvidia
+    "Nvidia GeForce GTX 1050": "Nvidia",
+    "Nvidia GeForce GTX 1650": "Nvidia",
+    "Nvidia GeForce RTX 2060": "Nvidia",
+    "Nvidia GeForce RTX 3060": "Nvidia",
+    "Nvidia GeForce RTX 4090": "Nvidia",
+
+    # AMD
+    "AMD Radeon Vega 8": "AMD",
+    "AMD Radeon RX 5600M": "AMD",
+    "AMD Radeon RX 6800M": "AMD",
+
+    # Fallback
+    "Other": "Other"
+}
 
 # User inputs
 company = st.selectbox("Company", [
@@ -34,17 +79,12 @@ typename = st.selectbox("Type", [
     "Workstation",
     "Netbook"
     ])
-cpu = st.selectbox("CPU Brand", [
-    "Intel",
-    "AMD", 
-    "Other"
-    ])
-gpu = st.selectbox("GPU Brand", [
-    "Intel", 
-    "Nvidia", 
-    "AMD", 
-    "Other"
-    ])
+
+cpu_choice = st.selectbox("CPU Brand", list(CPU_MAP.keys()))
+cpu = CPU_MAP.get(cpu_choice, "Other")  # Default to "Other" if not found.
+gpu_choice = st.selectbox("GPU Brand", list(GPU_MAP.keys()))
+gpu = GPU_MAP.get(gpu_choice, "Other")
+
 opsys = st.selectbox("Operating System", [
     "Windows 11",
     "Windows 10", 
@@ -54,7 +94,7 @@ opsys = st.selectbox("Operating System", [
     "No OS"
     ])
 
-ram = st.slider("RAM (GB)", min_value=2, max_value=128, step=2, value=8)
+ram = st.slider("RAM (GB)", min_value=8, max_value=128, step=8, value=8)
 weight = st.number_input("Weight (kg)", min_value=0.5, max_value=5.0, step=0.1)
 ssd = st.number_input("SSD size (GB)", min_value=0, max_value=4000, value=512, step=128)
 hdd = st.number_input("HDD size (GB)", min_value=0, max_value=6000, value=0, step=500)
@@ -73,7 +113,7 @@ if opsys == "Windows 11": opsys = "Windows 10"
 if st.button("Predict Price"):
     try:
         # Build input DataFrame
-        received_data = pd.DataFrame([{
+        received_data = {
             "Company": company,
             "TypeName": typename,
             "Inches": inches,
@@ -86,7 +126,7 @@ if st.button("Predict Price"):
             "Flash_Storage": flash,
             "Cpu_brand": cpu,
             "Gpu_brand": gpu
-        }])
+        }
 
         # NOTE: Applying the same preprocessing (target encoding + scaling) here.
         input_data = preprocess_input(received_data, feature_names)
@@ -111,5 +151,5 @@ if st.button("Predict Price"):
         st.success(f"Estimated Price: ₤{prediction:.4f}")
     except Exception as e:
         log_event("error", "StreamlitApp", str(received_data.to_dict()), f"Prediction failed: {e}")
-        st.error(f"Something went wrong while generating the prediction. Please check your inputs and try again.")
+        st.error(f"Something went wrong while generating the prediction. Please check your inputs and try again. {e}")
 

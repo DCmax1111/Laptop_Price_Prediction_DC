@@ -1,4 +1,5 @@
 import re
+import os
 import pandas as pd
 import streamlit as st
 import joblib
@@ -60,12 +61,13 @@ TYPE_ALIASES = {
 def log_event(kind, field, value, message):
     """Log invalid input or auto-corrections to a file."""
     try:
-        with open(LOG_FILE, "a") as f:
+        os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+        with open(LOG_FILE, "a", encoding="utf-8") as f:
             ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             f.write(f"[{ts}] {kind.upper()} | Field: {field} | Value: '{value}' | {message}\n")
-    except Exception:
-        # Never crash on logging
-        pass
+    except Exception as e:
+        # Never crash on logging, but show debug info in console.
+        st.error(f"Logging failed: {e}")
 
 # ---------- Smart parsing helpers ----------
 
