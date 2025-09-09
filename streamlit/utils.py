@@ -20,7 +20,6 @@ try:
 except Exception as e:
     # Delay hard failure until prediction time; keep CLI usable for now.
     st.error(f"Error loading feature_names.")
-    f = "False"
     model = None
     feature_names = None
 
@@ -301,5 +300,14 @@ def predict_price(model, sample_encoded):
         log_event("error", "PREDICT", str(sample_encoded), f"Prediction failure: {e}")
         return None
 
-if f == "False":
-    log_event("error", "StreamlitApp", str(e), f"Couldn't load feature names.")
+def final_price(pred, company, typename):
+    if 100 < pred < 400:           # Low-end.
+        f_prediction = pred * 1.05   # +5%
+        st.success(f"Approximate Price for the {str(company)} {str(typename)}: €{pred:.2f}")
+        st.success(f"Estimated Price for the {str(company)} {str(typename)}: €{f_prediction:.2f}")
+    elif 400 < pred < 800:   # Mid-range.
+        f_prediction = pred * 0.98   # -2%
+        st.success(f"Approximate Price for the {str(company)} {str(typename)}: €{pred:.2f}")
+        st.success(f"Estimated Price for the {str(company)} {str(typename)}: €{f_prediction:.2f}")
+    else:                    # High-end.
+        st.success(f"Estimated Price for the {str(company)} {str(typename)}: €{pred:.2f}")          # Keep as is.

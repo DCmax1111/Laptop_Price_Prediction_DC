@@ -2,7 +2,7 @@ from time import sleep
 import streamlit as st
 import pandas as pd
 import joblib
-from utils import feature_names, preprocess_input, predict_price, log_event, LOG_FILE
+from utils import feature_names, preprocess_input, predict_price, log_event, final_price
 
 # Load the trained model
 model = joblib.load("models/best_model.pkl")
@@ -68,8 +68,7 @@ company = st.selectbox("Company", [
     "Samsung",
     "Toshiba",
     "Huawei",
-    "Microsoft",
-    "Other"
+    "Microsoft"
     ])
 typename = st.selectbox("Type", [
     "Ultrabook", 
@@ -94,7 +93,7 @@ opsys = st.selectbox("Operating System", [
     "No OS"
     ])
 
-ram = st.slider("RAM (GB)", min_value=8, max_value=128, step=8, value=8)
+ram = st.slider("RAM (GB)", min_value=4, max_value=128, step=4, value=8)
 weight = st.number_input("Weight (kg)", min_value=0.5, max_value=5.0, step=0.1)
 ssd = st.number_input("SSD size (GB)", min_value=0, max_value=4000, value=512, step=128)
 hdd = st.number_input("HDD size (GB)", min_value=0, max_value=6000, value=0, step=500)
@@ -131,12 +130,12 @@ if st.button("Predict Price"):
         # NOTE: Applying the same preprocessing (target encoding + scaling) here.
         input_data = preprocess_input(received_data, feature_names)
 
-        st.write("Encoded sample shape:", input_data.shape)
-        st.write("Model expects:", len(feature_names), "features")
-        missing = set(feature_names) - set(input_data.columns)
-        extra = set(input_data.columns) - set(feature_names)
-        st.write("Missing features:", missing)
-        st.write("Unexpected extra features:", extra)
+        # st.write("Encoded sample shape:", input_data.shape)
+        # st.write("Model expects:", len(feature_names), "features")
+        # missing = set(feature_names) - set(input_data.columns)
+        # extra = set(input_data.columns) - set(feature_names)
+        # st.write("Missing features:", missing)
+        # st.write("Unexpected extra features:", extra)
 
         # Prediction
         with st.spinner("Calculating..."):
@@ -144,15 +143,16 @@ if st.button("Predict Price"):
             prediction = predict_price(model, input_data)
             # prediction = model.predict(input_data)[0]
         
-        # Sanity bounds (based on your dataset: ₤100 - ₤6000)
+        # Sanity bounds (based on your dataset: €100 - €6999)
         if prediction is not None:
             if prediction < 100 or prediction > 6999:  # Bounds based on dataset and logic.
                 log_event("warn", "Prediction", str(received_data), f"Unrealistic prediction: {prediction:.2f}")
-                st.warning(f"Prediction seems unrealistic (₤{prediction:.2f}). Please re-check your inputs.")
+                st.warning(f"Prediction seems unrealistic (€{prediction:.2f}). Please re-check your inputs.")
             else:
                 st.toast("Prediction ready!")
                 sleep(1.0)
-                st.success(f"Estimated Price: ₤{prediction:.4f}")
+                final_price(prediction, company, typename)
+                
         else:
             st.error(f"Prediction failed. Please try again.")
 
