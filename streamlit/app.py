@@ -1,18 +1,18 @@
+from time import sleep
 import streamlit as st
 import pandas as pd
 import joblib
-from utils import model, feature_names, preprocess_input, predict_price, log_event
+from utils import feature_names, preprocess_input, predict_price, log_event, LOG_FILE
 
-# Load the trained model + scaler
+# Load the trained model
 model = joblib.load("models/best_model.pkl")
-scaler = joblib.load("models/scaler.pkl")
-LOG_FILE = "logs/input_errors.log"
-st.write("Loaded features:", feature_names[:10])
+# scaler = joblib.load("models/scaler.pkl")
 
+# Streamlit UI
 st.title("Laptop Price Prediction App")
-st.write("Enter your laptop specifications to predict the price.")
+st.write("Enter your laptop specifications to predict the price in Euros (€).")
 
-# Options
+# Choice options
 CPU_MAP = {
     # Intel
     "Intel Core i3": "Intel",
@@ -138,18 +138,25 @@ if st.button("Predict Price"):
         st.write("Missing features:", missing)
         st.write("Unexpected extra features:", extra)
 
+        # Prediction
         with st.spinner("Calculating..."):
+            sleep(1.0)
             prediction = predict_price(model, input_data)
             # prediction = model.predict(input_data)[0]
         
         # Sanity bounds (based on your dataset: ₤100 - ₤6000)
-        if prediction < 100 or prediction > 6000:
-            log_event("warn", "Prediction", str(received_data.to_dict()), f"Unrealistic prediction: {prediction:.2f}")
-            st.warning(f"Prediction seems unrealistic (₤{prediction:.2f}). Please re-check your inputs.")
-            
-        st.toast("Prediction ready!")
-        st.success(f"Estimated Price: ₤{prediction:.4f}")
+        if prediction is not None:
+            if prediction < 100 or prediction > 6999:  # Bounds based on dataset and logic.
+                log_event("warn", "Prediction", str(received_data), f"Unrealistic prediction: {prediction:.2f}")
+                st.warning(f"Prediction seems unrealistic (₤{prediction:.2f}). Please re-check your inputs.")
+            else:
+                st.toast("Prediction ready!")
+                sleep(1.0)
+                st.success(f"Estimated Price: ₤{prediction:.4f}")
+        else:
+            st.error(f"Prediction failed. Please try again.")
+
     except Exception as e:
-        log_event("error", "StreamlitApp", str(received_data.to_dict()), f"Prediction failed: {e}")
-        st.error(f"Something went wrong while generating the prediction. Please check your inputs and try again. {e}")
+        log_event("error", "StreamlitApp", str(received_data), f"Prediction failed: {e}")
+        st.error(f"Something went wrong while generating the prediction. Please check your inputs and try again.")
 

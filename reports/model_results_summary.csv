@@ -1,3 +1,3 @@
 model,MAE,RMSE,R²
-Linear Regression (All Features),236.2049,321.3514,0.79
-Linear Regression (Reduced Features),240.4856,325.8529,0.7841
+Linear Regression (Scaled Data),243.922,389.4574,0.6916
+Linear Regression (Unscaled Data),218.7522,301.7786,0.8148

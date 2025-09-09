@@ -14,8 +14,13 @@ LOG_FILE = "logs/input_errors.log"
 try:
     model = joblib.load(MODEL_PATH)
     feature_names = joblib.load(FEATURES_PATH)
-except Exception:
+    # st.write("Loaded feature names count:", len(feature_names))
+    # st.write("First few features:", feature_names[:10])
+
+except Exception as e:
     # Delay hard failure until prediction time; keep CLI usable for now.
+    st.error(f"Error loading feature_names.")
+    f = "False"
     model = None
     feature_names = None
 
@@ -67,7 +72,7 @@ def log_event(kind, field, value, message):
             f.write(f"[{ts}] {kind.upper()} | Field: {field} | Value: '{value}' | {message}\n")
     except Exception as e:
         # Never crash on logging, but show debug info in console.
-        st.error(f"Logging failed: {e}")
+        st.error(f"Logging event failed.")
 
 # ---------- Smart parsing helpers ----------
 
@@ -270,10 +275,12 @@ def preprocess_input(sample_dict, feature_names):
     sample_encoded = pd.get_dummies(sample)
     sample_encoded = sample_encoded.reindex(columns=feature_names, fill_value=0)
 
+    # numeric_columns = sample_encoded.select_dtypes(include=["float64", "int64"]).columns
+    # sample_encoded[numeric_columns] = scaler.transform(sample_encoded[numeric_columns])
     return sample_encoded
 
 def predict_price(model, sample_encoded):
-    """Run safe prediction; round and sanity check - never expose raw tracebacks."""
+    """Predict laptop price given specs; logs issues if any."""
     # Safety Checks
     if model is None:
         print("⚠️ Model not loaded. Please train first.")
@@ -281,12 +288,18 @@ def predict_price(model, sample_encoded):
     
     try:
         pred = model.predict(sample_encoded)[0]
-        # Clip outliers (dataset: ~€100–€6000)
-        if pred < 100 or pred > 6000:
-            print(f"⚠️ Warning: prediction {pred:.2f} may be unrealistic.")
-        return round(float(pred), 2)
+        pred = round(float(pred), 4)
+
+        # Log outliers (dataset: ~€100–€6990)
+        if pred < 100 or pred > 6990:
+            log_event("warn", "PREDICT", str(pred), f"Unrealistic prediction generated: €{pred}.")
+
+        return pred
     
     except Exception as e:
-        print("⚠️ Could not generate prediction.")
+        print("⚠️ Prediction failed. Please check preprocessing.")
         log_event("error", "PREDICT", str(sample_encoded), f"Prediction failure: {e}")
         return None
+
+if f == "False":
+    log_event("error", "StreamlitApp", str(e), f"Couldn't load feature names.")
